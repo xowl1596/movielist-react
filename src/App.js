@@ -1,30 +1,53 @@
-import React from 'react';
+import React, {Component} from 'react';
 import './App.css';
 import Movie from './movie'
 
-const movieTitles = [
-  "matrix",
-  "full metal jacket",
-  "oldboy",
-  "star wars"
-];
+class App extends Component{
 
-const movieImages = [
-  "matrix img",
-  "fmj img",
-  "oldboy img",
-  "starwars img"
-];
+  state = {
 
-function App() {
-  return (
-    <div className="App">
-      <Movie title={movieTitles[0]} poster={movieImages[0]}/>
-      <Movie title={movieTitles[1]} poster={movieImages[1]}/>
-      <Movie title={movieTitles[2]} poster={movieImages[2]}/>
-      <Movie title={movieTitles[3]} poster={movieImages[3]}/>
-    </div>
-  );
+  };
+
+  componentDidMount(){
+    this._getMovies();
+  }
+
+  _renderMovies = () => {
+    const movies = this.state.movies.map((movie, index)=>{
+      return (
+        <Movie
+          title={movie.title_english}
+          poster={movie.medium_cover_image}
+          genres={movie.genres}
+          synopsis = {movie.synopsis}
+          key={movie.id}/>);
+    });
+
+    return movies;
+  }
+
+  _getMovies = async () => {
+    const movies = await this._callApi();
+    this.setState({
+      movies
+    });
+  }
+
+  _callApi = () => {
+    return fetch('https://yts.lt/api/v2/list_movies.json?sort_by=rating')
+    .then(response => response.json())
+    .then(json => json.data.movies)
+    .catch(err => console.log(err));
+  }
+
+  render(){
+    const {movies} = this.state;
+    return (
+      <div className={movies ? "App" : "App--loading"}>
+        {this.state.movies ? this._renderMovies() : 'loading'}
+      </div>
+    );
+  }
 }
 
 export default App;
